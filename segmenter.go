@@ -3,18 +3,12 @@ package sego
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"math"
 	"os"
-	"strconv"
 	"strings"
 	"unicode"
 	"unicode/utf8"
-)
-
-const (
-	minTokenFrequency = 2 // 仅从字典文件中读取大于等于此频率的分词
 )
 
 // 分词器结构体
@@ -44,7 +38,7 @@ func (seg *Segmenter) Dictionary() *Dictionary {
 func (seg *Segmenter) LoadDictionary(files string) {
 	seg.dict = NewDictionary()
 	for _, file := range strings.Split(files, ",") {
-		log.Printf("载入sego词典 %s", file)
+		// log.Printf("载入sego词典 %s", file)
 		dictFile, err := os.Open(file)
 		defer dictFile.Close()
 		if err != nil {
@@ -53,35 +47,19 @@ func (seg *Segmenter) LoadDictionary(files string) {
 
 		reader := bufio.NewReader(dictFile)
 		var text string
-		var freqText string
 		var frequency int
 		var pos string
 
 		// 逐行读入分词
 		for {
-			size, _ := fmt.Fscanln(reader, &text, &freqText, &pos)
-
-			if size == 0 {
-				// 文件结束
+			line, _ := reader.ReadString('\n')
+			arrs := strings.Split(line, "	")
+			size := len(arrs)
+			if size == 2 {
+				text = arrs[0]
+				pos = arrs[1]
+			} else if size == 1 {
 				break
-			} else if size < 2 {
-				// 无效行
-				continue
-			} else if size == 2 {
-				// 没有词性标注时设为空字符串
-				pos = ""
-			}
-
-			// 解析词频
-			var err error
-			frequency, err = strconv.Atoi(freqText)
-			if err != nil {
-				continue
-			}
-
-			// 过滤频率太小的词
-			if frequency < minTokenFrequency {
-				continue
 			}
 
 			// 将分词添加到字典中
@@ -123,8 +101,6 @@ func (seg *Segmenter) LoadDictionary(files string) {
 			}
 		}
 	}
-
-	log.Println("sego词典载入完毕")
 }
 
 // 对文本分词
@@ -263,7 +239,7 @@ func splitTextToWords(text Text) []Text {
 			if inAlphanumeric {
 				inAlphanumeric = false
 				if current != 0 {
-					output = append(output, toLower(text[alphanumericStart:current]))
+					output = append(output, text[alphanumericStart:current])
 				}
 			}
 			output = append(output, text[current:current+size])
@@ -274,22 +250,9 @@ func splitTextToWords(text Text) []Text {
 	// 处理最后一个字元是英文的情况
 	if inAlphanumeric {
 		if current != 0 {
-			output = append(output, toLower(text[alphanumericStart:current]))
+			output = append(output, text[alphanumericStart:current])
 		}
 	}
 
-	return output
-}
-
-// 将英文词转化为小写
-func toLower(text []byte) []byte {
-	output := make([]byte, len(text))
-	for i, t := range text {
-		if t >= 'A' && t <= 'Z' {
-			output[i] = t - 'A' + 'a'
-		} else {
-			output[i] = t
-		}
-	}
 	return output
 }
