@@ -1,6 +1,6 @@
 package sego
 
-import "github.com/adamzy/cedar-go"
+import "github.com/jiangzhengqiao/cedar-go"
 
 // Dictionary结构体实现了一个字串前缀树，一个分词可能出现在叶子节点也有可能出现在非叶节点
 type Dictionary struct {

@@ -53,17 +53,38 @@ func SegmentsToSlice(segs []Segment, searchMode bool) (output []string) {
 		}
 	} else {
 		for _, seg := range segs {
-			output = append(output, seg.token.Text())
+			text := seg.token.Text()
+			pos := seg.token.Pos()
+			if pos != "x" {
+				output = append(output, text+"\t"+pos)
+			}
 		}
 	}
 	return
 }
 
 func tokenToSlice(token *Token) (output []string) {
+	var pos string
 	for _, s := range token.segments {
-		output = append(output, tokenToSlice(s.token)...)
+		pos = s.token.Pos()
+		if pos != "x" {
+			output = append(output, tokenToSlice(s.token)...)
+		}
 	}
-	output = append(output, textSliceToString(token.text))
+
+	pos = token.Pos()
+	if pos != "x" {
+		output = append(output, textSliceToString1(token))
+	}
+	return output
+}
+
+func textSliceToString1(token *Token) string {
+	var output string
+	for _, word := range token.text {
+		output += string(word)
+	}
+	output = output + "\t" + token.Pos()
 	return output
 }
 
