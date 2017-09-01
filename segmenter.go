@@ -10,7 +10,7 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"wdzj.com/wdzj/mysql"
+	"anchor_text/mysql"
 )
 
 // 分词器结构体
