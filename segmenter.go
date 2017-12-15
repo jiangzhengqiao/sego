@@ -108,17 +108,17 @@ func (seg *Segmenter) LoadDictionary(files string) {
 // 姜正峤修改,从DB加载锚文本
 func (seg *Segmenter) LoadDictionaryForDB() {
 	seg.dict = NewDictionary()
-	rows, err := mysql.DB.Raw("SELECT TEXT,URL,MD5 FROM WDZJ_NEWS_ANCHOR").Rows()
+	rows, err := mysql.DB.Raw("SELECT TEXT, URL FROM WDZJ_NEWS_ANCHOR").Rows()
 	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
 	for rows.Next() {
-		var TEXT, URL, MD5 string
-		rows.Scan(&TEXT, &URL, &MD5)
+		var TEXT, URL string
+		rows.Scan(&TEXT, &URL)
 		// 将分词添加到字典中
 		words := splitTextToWords([]byte(TEXT))
-		token := Token{text: words, frequency: 0, pos: `<a id="neilianxitong" href="` + URL + `">` + TEXT + `</a>`}
+		token := Token{text: words, frequency: 0, pos: `<a id="neilianxitong" target="_blank" href="` + URL + `">` + TEXT + `</a>`}
 		seg.dict.addToken(token)
 	}
 
